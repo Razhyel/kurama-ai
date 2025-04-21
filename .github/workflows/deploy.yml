@@ -27,8 +27,12 @@ jobs:
     - name: Install Railway CLI
       run: npm install -g @railway/cli
 
+    - name: Link to Railway project
+      run: railway link --project 7d296bec-3fe9-4012-a15b-c139faf4cb64
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
     - name: Deploy to Railway
       run: railway up --service kurama-ai
       env:
         RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        RAILWAY_PROJECT_ID: 7d296bec-3fe9-4012-a15b-c139faf4cb64
