@@ -24,9 +24,9 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Deploy to Railway
+    - name: Deploy to Railway (new)
       env:
         RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       run: |
-        npm install -g railway
+          run: npm install -g @railway/cli
         railway up
