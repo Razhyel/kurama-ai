@@ -101,7 +101,6 @@ Você pode configurar o modelo por canal, com persistência durante a sessão.
 
 ## 📄 Licença
 
-MIT © Razhyel
 Este projeto está licenciado sob os termos da [Licença MIT](LICENSE), de autoria de **Razhyel**.
 ---
 
