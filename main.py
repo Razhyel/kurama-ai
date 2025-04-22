@@ -1,6 +1,7 @@
 import os
 import discord
 import requests
+from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -12,11 +13,10 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
+tree = bot.tree
 
-# Modelo padrão global
 DEFAULT_MODEL = "deepseek/deepseek-chat-v3-0324:free"
 
-# Dicionário de modelos disponíveis com descrição
 modelos_validos = {
     "deepseek-chat": {
         "id": "deepseek-ai/deepseek-chat",
@@ -48,162 +48,119 @@ modelos_validos = {
     }
 }
 
-# Armazenamento por canal
 historico_por_canal = {}
 modo_continuo_por_canal = {}
 modelo_por_canal = {}
 
 @bot.event
 async def on_ready():
+    await tree.sync()
     print(f"✅ Logado como {bot.user}")
 
-@bot.command()
-async def modelos(ctx):
+@tree.command(name="modelos", description="Lista os modelos de IA disponíveis")
+async def modelos(interaction: discord.Interaction):
     mensagem = "**📋 Modelos disponíveis:**\n\n"
     for nome, info in modelos_validos.items():
         mensagem += f"🔹 `{nome}` → {info['desc']}\n"
-    await ctx.send(mensagem)
+    await interaction.response.send_message(mensagem)
 
-@bot.command()
-async def model(ctx, *, model_name=None):
-    canal = ctx.channel.id
+@tree.command(name="model", description="Define ou mostra o modelo atual para o canal")
+@app_commands.describe(model_name="Nome do modelo (use /modelos para ver)")
+async def model(interaction: discord.Interaction, model_name: str = None):
+    canal = interaction.channel.id
     if not model_name:
         modelo_atual = modelo_por_canal.get(canal, DEFAULT_MODEL)
-        await ctx.send(f"🧠 Modelo atual deste canal: `{modelo_atual}`")
+        await interaction.response.send_message(f"🧠 Modelo atual deste canal: `{modelo_atual}`")
         return
 
     model_key = model_name.lower()
     if model_key in modelos_validos:
         modelo_por_canal[canal] = modelos_validos[model_key]["id"]
-        await ctx.send(f"✅ Modelo deste canal alterado para `{modelo_por_canal[canal]}`")
+        await interaction.response.send_message(f"✅ Modelo deste canal alterado para `{modelo_por_canal[canal]}`")
     else:
-        await ctx.send("❌ Modelo inválido. Use `!modelos` para ver a lista disponível.")
+        await interaction.response.send_message("❌ Modelo inválido. Use `/modelos` para ver a lista disponível.")
 
-@bot.command()
-async def reset(ctx):
-    canal = ctx.channel.id
-    if canal in modelo_por_canal:
-        del modelo_por_canal[canal]
-    await ctx.send(f"🔄 Modelo deste canal resetado para o padrão: `{DEFAULT_MODEL}`")
+@tree.command(name="reset", description="Restaura o modelo padrão para este canal")
+async def reset(interaction: discord.Interaction):
+    canal = interaction.channel.id
+    modelo_por_canal.pop(canal, None)
+    await interaction.response.send_message(f"🔄 Modelo deste canal resetado para o padrão: `{DEFAULT_MODEL}`")
 
-@bot.command()
-async def ia(ctx, modo=None):
-    canal = ctx.channel.id
+@tree.command(name="ia", description="Ativa, desativa ou consulta o modo contínuo")
+@app_commands.describe(modo="Escolha on, off ou deixe em branco para ver o estado atual")
+async def ia(interaction: discord.Interaction, modo: str = None):
+    canal = interaction.channel.id
     if modo == "on":
         modo_continuo_por_canal[canal] = True
-        await ctx.send("🧠 Modo contínuo **ativado** para este canal.")
+        await interaction.response.send_message("🧠 Modo contínuo **ativado** para este canal.")
     elif modo == "off":
         modo_continuo_por_canal[canal] = False
-        await ctx.send("🔁 Modo contínuo **desativado** para este canal.")
+        await interaction.response.send_message("🔁 Modo contínuo **desativado** para este canal.")
     else:
         estado = modo_continuo_por_canal.get(canal, False)
-        await ctx.send(f"🔎 Modo contínuo está: {'ativado ✅' if estado else 'desativado ❌'}")
+        await interaction.response.send_message(f"🔎 Modo contínuo está: {'ativado ✅' if estado else 'desativado ❌'}")
 
-@bot.command()
-async def resetmemoria(ctx):
-    canal = ctx.channel.id
+@tree.command(name="resetmemoria", description="Apaga a memória de conversas deste canal")
+async def resetmemoria(interaction: discord.Interaction):
+    canal = interaction.channel.id
     historico_por_canal[canal] = []
-    await ctx.send("🧽 Memória deste canal apagada com sucesso!")
+    await interaction.response.send_message("🧽 Memória deste canal apagada com sucesso!")
 
-@bot.command(name="ajuda")
-async def ajuda_command(ctx):
+@tree.command(name="ajuda", description="Lista os comandos disponíveis")
+async def ajuda(interaction: discord.Interaction):
     embed = discord.Embed(
         title="🤖 Comandos disponíveis",
         description="Aqui estão os comandos que você pode usar com o bot:",
         color=discord.Color.blue()
     )
+    embed.add_field(name="/ask", value="Pergunte algo à IA.", inline=False)
+    embed.add_field(name="/code", value="Recebe a resposta formatada como código.", inline=False)
+    embed.add_field(name="/modelos", value="Lista os modelos de IA disponíveis.", inline=False)
+    embed.add_field(name="/model", value="Define o modelo de IA no canal.", inline=False)
+    embed.add_field(name="/reset", value="Reseta o modelo para o padrão.", inline=False)
+    embed.add_field(name="/ia", value="Ativa/desativa o modo contínuo.", inline=False)
+    embed.add_field(name="/resetmemoria", value="Apaga a memória do canal.", inline=False)
+    embed.add_field(name="/ajuda", value="Mostra esta lista de comandos.", inline=False)
 
-    embed.add_field(
-        name="`!ask [pergunta]`",
-        value="Faz uma pergunta para a IA e retorna a resposta.",
-        inline=False
-    )
-    embed.add_field(
-        name="`!code [pergunta]`",
-        value="Retorna a resposta como bloco de código (ótimo para comandos e programação).",
-        inline=False
-    )
-    embed.add_field(
-        name="`!modelos`",
-        value="Lista os modelos de IA disponíveis.",
-        inline=False
-    )
-    embed.add_field(
-        name="`!model [nome]`",
-        value="Define o modelo de IA neste canal. Use `!modelos` para ver as opções.",
-        inline=False
-    )
-    embed.add_field(
-        name="`!reset`",
-        value="Restaura o modelo do canal para o padrão.",
-        inline=False
-    )
-    embed.add_field(
-        name="`!ia on/off`",
-        value="Ativa ou desativa o modo contínuo (memória da conversa).",
-        inline=False
-    )
-    embed.add_field(
-        name="`!ia`",
-        value="Mostra o estado atual do modo contínuo no canal.",
-        inline=False
-    )
-    embed.add_field(
-        name="`!resetmemoria`",
-        value="Apaga o histórico de conversa deste canal.",
-        inline=False
-    )
-    embed.add_field(
-        name="`!help`",
-        value="Exibe esta lista de comandos.",
-        inline=False
-    )
-
-    canal = ctx.channel.id
+    canal = interaction.channel.id
     modelo_atual = modelo_por_canal.get(canal, DEFAULT_MODEL)
     embed.set_footer(text=f"🧠 Modelo atual: {modelo_atual}")
 
-    await ctx.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
-@bot.command()
-async def ask(ctx, *, question):
-    canal = ctx.channel.id
-    await ctx.send("Pensando... 🤔")
-
-    if canal not in historico_por_canal:
-        historico_por_canal[canal] = []
-
-    historico = historico_por_canal[canal] if modo_continuo_por_canal.get(canal, False) else []
+@tree.command(name="ask", description="Faz uma pergunta à IA")
+@app_commands.describe(question="Sua pergunta para a IA")
+async def ask(interaction: discord.Interaction, question: str):
+    canal = interaction.channel.id
+    await interaction.response.defer()
+    
+    historico = historico_por_canal.get(canal, []) if modo_continuo_por_canal.get(canal, False) else []
     historico.append({"role": "user", "content": question})
 
     response = get_ai_response(historico, canal)
 
     historico.append({"role": "assistant", "content": response})
-
     if modo_continuo_por_canal.get(canal, False):
         historico_por_canal[canal] = historico[-15:]
 
-    await ctx.send(response)
+    await interaction.followup.send(response)
 
-@bot.command()
-async def code(ctx, *, pergunta):
-    canal = ctx.channel.id
-    await ctx.send("💻 Gerando código...")
-
-    if canal not in historico_por_canal:
-        historico_por_canal[canal] = []
-
-    historico = historico_por_canal[canal] if modo_continuo_por_canal.get(canal, False) else []
+@tree.command(name="code", description="Faz uma pergunta e recebe a resposta como código")
+@app_commands.describe(pergunta="Pergunta para a IA")
+async def code(interaction: discord.Interaction, pergunta: str):
+    canal = interaction.channel.id
+    await interaction.response.defer()
+    
+    historico = historico_por_canal.get(canal, []) if modo_continuo_por_canal.get(canal, False) else []
     historico.append({"role": "user", "content": pergunta})
 
     response = get_ai_response(historico, canal)
 
     historico.append({"role": "assistant", "content": response})
-
     if modo_continuo_por_canal.get(canal, False):
         historico_por_canal[canal] = historico[-15:]
 
-    await ctx.send(f"```markdown\n{response}\n```")
+    await interaction.followup.send(f"```markdown\n{response}\n```")
 
 def get_ai_response(messages, canal):
     model = modelo_por_canal.get(canal, DEFAULT_MODEL)
