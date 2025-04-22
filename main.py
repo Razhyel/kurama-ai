@@ -105,7 +105,7 @@ async def resetmemoria(ctx):
     historico_por_canal[canal] = []
     await ctx.send("🧽 Memória deste canal apagada com sucesso!")
 
-@bot.command(name="ajuda", aliases=["help"])
+@bot.command(name="ajuda")
 async def ajuda_command(ctx):
     embed = discord.Embed(
         title="🤖 Comandos disponíveis",
