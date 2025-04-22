@@ -112,6 +112,28 @@ async def resetmemoria(ctx):
     await ctx.send("🧽 Memória deste canal apagada com sucesso!")
 
 @bot.command()
+async def code(ctx, *, pergunta):
+    canal = ctx.channel.id
+    await ctx.send("💻 Gerando código...")
+
+    if canal not in historico_por_canal:
+        historico_por_canal[canal] = []
+
+    historico = historico_por_canal[canal] if modo_continuo_por_canal.get(canal, False) else []
+    historico.append({"role": "user", "content": pergunta})
+
+    response = get_ai_response(historico)
+
+    historico.append({"role": "assistant", "content": response})
+
+    if modo_continuo_por_canal.get(canal, False):
+        historico_por_canal[canal] = historico[-15:]
+
+    # Envia como bloco de código (```)
+    await ctx.send(f"```markdown\n{response}\n```")
+
+
+@bot.command()
 async def ask(ctx, *, question):
     canal = ctx.channel.id
     await ctx.send("Pensando... 🤔")
