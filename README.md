@@ -1,4 +1,4 @@
-# 🤖 Kurama Bot
+# 🦊 Kurama Bot
 
 Um bot de IA para Discord usando `discord.py`, comandos slash e integração com modelos da OpenRouter (DeepSeek, Claude, LLaMA, etc).
 
