@@ -53,11 +53,11 @@ modelos_validos = {
 async def on_ready():
     print(f"Logged in as {bot.user}")
 
-@bot.command()
-async def ask(ctx, *, question):
-    await ctx.send("Pensando... 🤔")
-    response = get_ai_response(question)
-    await ctx.send(response)
+# @bot.command()
+# async def ask(ctx, *, question):
+#     await ctx.send("Pensando... 🤔")
+#     response = get_ai_response(question)
+#     await ctx.send(response)
 
 @bot.command()
 async def model(ctx, *, model_name=None):
@@ -86,16 +86,63 @@ async def reset(ctx):
     current_model = DEFAULT_MODEL
     await ctx.send(f"🔄 Modelo resetado para o padrão: `{DEFAULT_MODEL}`")
 
-def get_ai_response(prompt):
+# [continuação do código anterior]
+
+# Histórico por canal
+historico_por_canal = {}
+modo_continuo_por_canal = {}
+
+@bot.command()
+async def ia(ctx, modo=None):
+    canal = ctx.channel.id
+    if modo == "on":
+        modo_continuo_por_canal[canal] = True
+        await ctx.send("🧠 Modo contínuo **ativado** para este canal.")
+    elif modo == "off":
+        modo_continuo_por_canal[canal] = False
+        await ctx.send("🔁 Modo contínuo **desativado** para este canal.")
+    else:
+        estado = modo_continuo_por_canal.get(canal, False)
+        await ctx.send(f"🔎 Modo contínuo está: {'ativado ✅' if estado else 'desativado ❌'}")
+
+@bot.command()
+async def resetmemoria(ctx):
+    canal = ctx.channel.id
+    historico_por_canal[canal] = []
+    await ctx.send("🧽 Memória deste canal apagada com sucesso!")
+
+@bot.command()
+async def ask(ctx, *, question):
+    canal = ctx.channel.id
+    await ctx.send("Pensando... 🤔")
+    
+    # Inicializa histórico se necessário
+    if canal not in historico_por_canal:
+        historico_por_canal[canal] = []
+
+    historico = historico_por_canal[canal] if modo_continuo_por_canal.get(canal, False) else []
+    historico.append({"role": "user", "content": question})
+
+    response = get_ai_response(historico)
+    
+    historico.append({"role": "assistant", "content": response})
+    
+    if modo_continuo_por_canal.get(canal, False):
+        historico_por_canal[canal] = historico[-15:]  # mantém últimos 15 turnos
+
+    await ctx.send(response)
+
+def get_ai_response(messages):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
     }
     json = {
         "model": current_model,
-        "messages": [{"role": "user", "content": prompt}]
+        "messages": messages
     }
     r = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=json)
     return r.json()['choices'][0]['message']['content']
+
 
 bot.run(TOKEN)
