@@ -163,7 +163,6 @@ async def help_command(ctx):
 
     await ctx.send(embed=embed)
 
-
 @bot.command()
 async def ask(ctx, *, question):
     canal = ctx.channel.id
