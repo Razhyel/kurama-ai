@@ -105,6 +105,65 @@ async def resetmemoria(ctx):
     historico_por_canal[canal] = []
     await ctx.send("🧽 Memória deste canal apagada com sucesso!")
 
+@bot.command(name="help")
+async def help_command(ctx):
+    embed = discord.Embed(
+        title="🤖 Comandos disponíveis",
+        description="Aqui estão os comandos que você pode usar com o bot:",
+        color=discord.Color.blue()
+    )
+
+    embed.add_field(
+        name="`!ask [pergunta]`",
+        value="Faz uma pergunta para a IA e retorna a resposta.",
+        inline=False
+    )
+    embed.add_field(
+        name="`!code [pergunta]`",
+        value="Retorna a resposta como bloco de código (ótimo para comandos e programação).",
+        inline=False
+    )
+    embed.add_field(
+        name="`!modelos`",
+        value="Lista os modelos de IA disponíveis.",
+        inline=False
+    )
+    embed.add_field(
+        name="`!model [nome]`",
+        value="Define o modelo de IA neste canal. Use `!modelos` para ver as opções.",
+        inline=False
+    )
+    embed.add_field(
+        name="`!reset`",
+        value="Restaura o modelo do canal para o padrão.",
+        inline=False
+    )
+    embed.add_field(
+        name="`!ia on/off`",
+        value="Ativa ou desativa o modo contínuo (memória da conversa).",
+        inline=False
+    )
+    embed.add_field(
+        name="`!ia`",
+        value="Mostra o estado atual do modo contínuo no canal.",
+        inline=False
+    )
+    embed.add_field(
+        name="`!resetmemoria`",
+        value="Apaga o histórico de conversa deste canal.",
+        inline=False
+    )
+    embed.add_field(
+        name="`!help`",
+        value="Exibe esta lista de comandos.",
+        inline=False
+    )
+
+    embed.set_footer(text=f"🧠 Modelo atual: {current_model}")
+
+    await ctx.send(embed=embed)
+
+
 @bot.command()
 async def ask(ctx, *, question):
     canal = ctx.channel.id
