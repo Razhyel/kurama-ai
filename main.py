@@ -13,9 +13,8 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Modelo padrão
+# Modelo padrão global
 DEFAULT_MODEL = "deepseek/deepseek-chat-v3-0324:free"
-current_model = DEFAULT_MODEL
 
 # Dicionário de modelos disponíveis com descrição
 modelos_validos = {
@@ -49,29 +48,14 @@ modelos_validos = {
     }
 }
 
+# Armazenamento por canal
+historico_por_canal = {}
+modo_continuo_por_canal = {}
+modelo_por_canal = {}
+
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user}")
-
-# @bot.command()
-# async def ask(ctx, *, question):
-#     await ctx.send("Pensando... 🤔")
-#     response = get_ai_response(question)
-#     await ctx.send(response)
-
-@bot.command()
-async def model(ctx, *, model_name=None):
-    global current_model
-    if not model_name:
-        await ctx.send(f"🧠 Modelo atual: `{current_model}`")
-        return
-
-    model_key = model_name.lower()
-    if model_key in modelos_validos:
-        current_model = modelos_validos[model_key]["id"]
-        await ctx.send(f"✅ Modelo alterado para `{current_model}`")
-    else:
-        await ctx.send("❌ Modelo inválido. Use `!modelos` para ver a lista disponível.")
+    print(f"✅ Logado como {bot.user}")
 
 @bot.command()
 async def modelos(ctx):
@@ -81,16 +65,26 @@ async def modelos(ctx):
     await ctx.send(mensagem)
 
 @bot.command()
+async def model(ctx, *, model_name=None):
+    canal = ctx.channel.id
+    if not model_name:
+        modelo_atual = modelo_por_canal.get(canal, DEFAULT_MODEL)
+        await ctx.send(f"🧠 Modelo atual deste canal: `{modelo_atual}`")
+        return
+
+    model_key = model_name.lower()
+    if model_key in modelos_validos:
+        modelo_por_canal[canal] = modelos_validos[model_key]["id"]
+        await ctx.send(f"✅ Modelo deste canal alterado para `{modelo_por_canal[canal]}`")
+    else:
+        await ctx.send("❌ Modelo inválido. Use `!modelos` para ver a lista disponível.")
+
+@bot.command()
 async def reset(ctx):
-    global current_model
-    current_model = DEFAULT_MODEL
-    await ctx.send(f"🔄 Modelo resetado para o padrão: `{DEFAULT_MODEL}`")
-
-# [continuação do código anterior]
-
-# Histórico por canal
-historico_por_canal = {}
-modo_continuo_por_canal = {}
+    canal = ctx.channel.id
+    if canal in modelo_por_canal:
+        del modelo_por_canal[canal]
+    await ctx.send(f"🔄 Modelo deste canal resetado para o padrão: `{DEFAULT_MODEL}`")
 
 @bot.command()
 async def ia(ctx, modo=None):
@@ -112,6 +106,26 @@ async def resetmemoria(ctx):
     await ctx.send("🧽 Memória deste canal apagada com sucesso!")
 
 @bot.command()
+async def ask(ctx, *, question):
+    canal = ctx.channel.id
+    await ctx.send("Pensando... 🤔")
+
+    if canal not in historico_por_canal:
+        historico_por_canal[canal] = []
+
+    historico = historico_por_canal[canal] if modo_continuo_por_canal.get(canal, False) else []
+    historico.append({"role": "user", "content": question})
+
+    response = get_ai_response(historico, canal)
+
+    historico.append({"role": "assistant", "content": response})
+
+    if modo_continuo_por_canal.get(canal, False):
+        historico_por_canal[canal] = historico[-15:]
+
+    await ctx.send(response)
+
+@bot.command()
 async def code(ctx, *, pergunta):
     canal = ctx.channel.id
     await ctx.send("💻 Gerando código...")
@@ -122,49 +136,27 @@ async def code(ctx, *, pergunta):
     historico = historico_por_canal[canal] if modo_continuo_por_canal.get(canal, False) else []
     historico.append({"role": "user", "content": pergunta})
 
-    response = get_ai_response(historico)
+    response = get_ai_response(historico, canal)
 
     historico.append({"role": "assistant", "content": response})
 
     if modo_continuo_por_canal.get(canal, False):
         historico_por_canal[canal] = historico[-15:]
 
-    # Envia como bloco de código (```)
     await ctx.send(f"```markdown\n{response}\n```")
 
-
-@bot.command()
-async def ask(ctx, *, question):
-    canal = ctx.channel.id
-    await ctx.send("Pensando... 🤔")
-    
-    # Inicializa histórico se necessário
-    if canal not in historico_por_canal:
-        historico_por_canal[canal] = []
-
-    historico = historico_por_canal[canal] if modo_continuo_por_canal.get(canal, False) else []
-    historico.append({"role": "user", "content": question})
-
-    response = get_ai_response(historico)
-    
-    historico.append({"role": "assistant", "content": response})
-    
-    if modo_continuo_por_canal.get(canal, False):
-        historico_por_canal[canal] = historico[-15:]  # mantém últimos 15 turnos
-
-    await ctx.send(response)
-
-def get_ai_response(messages):
+def get_ai_response(messages, canal):
+    model = modelo_por_canal.get(canal, DEFAULT_MODEL)
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
     }
     json = {
-        "model": current_model,
+        "model": model,
         "messages": messages
     }
     r = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=json)
+    r.raise_for_status()
     return r.json()['choices'][0]['message']['content']
-
 
 bot.run(TOKEN)
