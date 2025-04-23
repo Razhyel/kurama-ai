@@ -97,4 +97,4 @@ You can configure the model by channel, with persistence throughout the session.
 - `requests` for HTTP calls
 
 ## 📄 License
-This project is licensed under the terms of the MIT License.
+This project is licensed under the terms of the [MIT License](LICENSE).
