@@ -111,7 +111,7 @@ async def ajuda(interaction: discord.Interaction):
     embed = discord.Embed(
         title="🤖 Comandos disponíveis",
         description="Aqui estão os comandos que você pode usar com o bot:",
-        color=discord.Color.blue()
+        color=discord.Color.orange()
     )
     embed.add_field(name="/ask", value="Pergunte algo à IA.", inline=False)
     embed.add_field(name="/code", value="Recebe a resposta formatada como código.", inline=False)
@@ -133,7 +133,7 @@ async def ajuda(interaction: discord.Interaction):
 async def ask(interaction: discord.Interaction, question: str):
     canal = interaction.channel.id
     await interaction.response.defer()
-    
+
     historico = historico_por_canal.get(canal, []) if modo_continuo_por_canal.get(canal, False) else []
     historico.append({"role": "user", "content": question})
 
@@ -150,7 +150,7 @@ async def ask(interaction: discord.Interaction, question: str):
 async def code(interaction: discord.Interaction, pergunta: str):
     canal = interaction.channel.id
     await interaction.response.defer()
-    
+
     historico = historico_por_canal.get(canal, []) if modo_continuo_por_canal.get(canal, False) else []
     historico.append({"role": "user", "content": pergunta})
 
@@ -162,7 +162,8 @@ async def code(interaction: discord.Interaction, pergunta: str):
 
     await interaction.followup.send(f"```markdown\n{response}\n```")
 
-def get_ai_response(messages):
+def get_ai_response(messages, canal_id):
+    modelo = modelo_por_canal.get(canal_id, DEFAULT_MODEL)
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
@@ -180,7 +181,7 @@ def get_ai_response(messages):
     }
 
     json = {
-        "model": current_model,
+        "model": modelo,
         "messages": [system_message] + messages
     }
 
