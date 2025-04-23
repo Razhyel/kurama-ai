@@ -1,4 +1,4 @@
-# 🤖 Kurama Bot
+# 🦊 Kurama Bot
 
 Um bot de IA para Discord usando `discord.py`, comandos slash e integração com modelos da OpenRouter (DeepSeek, Claude, LLaMA, etc).
 
@@ -101,7 +101,6 @@ Você pode configurar o modelo por canal, com persistência durante a sessão.
 
 ## 📄 Licença
 
-MIT © Razhyel
 Este projeto está licenciado sob os termos da [Licença MIT](LICENSE), de autoria de **Razhyel**.
 ---
 
