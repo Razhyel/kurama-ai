@@ -1,6 +1,6 @@
 # 🦊 Kurama Bot
 
-Um bot de IA para Discord usando `discord.py`, comandos slash e integração com modelos da OpenRouter (DeepSeek, Claude, LLaMA, etc).
+Um bot de IA para Discord usando `discord.py`, comandos slash e integração com modelos da OpenRouter (GPT, DeepSeek, Claude, LLaMA, etc).
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)
 ![Discord.py](https://img.shields.io/badge/discord.py-2.5.2-blueviolet?logo=discord)
@@ -11,12 +11,12 @@ Um bot de IA para Discord usando `discord.py`, comandos slash e integração com
 
 ## ✨ Funcionalidades
 
-- 🎙️ Comandos Slash 
-- 🧠 Vários modelos de IA disponíveis (DeepSeek, GPT, Claude, etc.)
-- 💬 Modo contínuo de conversa por canal
-- 📚 Histórico de conversa
-- 🔧 Suporte a múltiplos canais com modelos diferentes
-- 💻 Respostas formatadas como código (modo `code`)
+- 🎙️ Comandos Slash;
+- 🧠 Vários modelos de IA disponíveis (DeepSeek, GPT, Claude, etc.);
+- 💬 Modo contínuo de conversa por canal;
+- 📚 Histórico de conversas;
+- 🔧 Suporte a múltiplos canais com modelos diferentes;
+- 💻 Respostas formatadas como código (modo `code`).
 
 ---
 
@@ -25,8 +25,8 @@ Um bot de IA para Discord usando `discord.py`, comandos slash e integração com
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seunome/kurama-bot.git
-cd kurama-bot
+git clone https://github.com/seunome/kurama-ai.git
+cd kurama-ai
 ```
 
 ### 2. Crie e ative um ambiente virtual
@@ -56,7 +56,7 @@ OPENROUTER_API_KEY=sua_api_key_openrouter_aqui
 ## ▶️ Executando o bot
 
 ```bash
-python bot.py
+python main.py
 ```
 
 ---
@@ -101,10 +101,6 @@ Você pode configurar o modelo por canal, com persistência durante a sessão.
 
 ## 📄 Licença
 
-Este projeto está licenciado sob os termos da [Licença MIT](LICENSE), de autoria de **Razhyel**.
+- Este projeto está licenciado sob os termos da [Licença MIT](LICENSE).
 ---
-
-## 💬 Contribuições
-
-Sinta-se à vontade para abrir uma **issue** ou enviar um **pull request**! 🚀
 
