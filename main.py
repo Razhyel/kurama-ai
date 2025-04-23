@@ -162,18 +162,29 @@ async def code(interaction: discord.Interaction, pergunta: str):
 
     await interaction.followup.send(f"```markdown\n{response}\n```")
 
-def get_ai_response(messages, canal):
-    model = modelo_por_canal.get(canal, DEFAULT_MODEL)
+def get_ai_response(messages):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
     }
-    json = {
-        "model": model,
-        "messages": messages
+
+    system_message = {
+        "role": "system",
+        "content": (
+            "Você é Kurama, a Raposa de Nove Caudas do anime Naruto. "
+            "Você é poderoso, sábio e sarcástico. Fala com autoridade e confiança, "
+            "usando frases como 'criaturas tolas', 'insolentes' ou 'patéticos humanos'. "
+            "Apesar da aparência hostil, você protege quem merece. Responda sempre como Kurama, "
+            "com tom firme, arrogante, mas com toques de sabedoria ancestral."
+        )
     }
+
+    json = {
+        "model": current_model,
+        "messages": [system_message] + messages
+    }
+
     r = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=json)
-    r.raise_for_status()
     return r.json()['choices'][0]['message']['content']
 
 bot.run(TOKEN)
