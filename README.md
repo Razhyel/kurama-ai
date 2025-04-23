@@ -1,50 +1,53 @@
 # 🦊 Kurama Bot
 
-Um bot de IA para Discord usando `discord.py`, comandos slash e integração com modelos da OpenRouter (GPT, DeepSeek, Claude, LLaMA, etc).
+An AI bot for Discord using `discord.py`, slash commands, and integration with models from OpenRouter (GPT, DeepSeek, Claude, LLaMA, etc).
+
+You can also read the project in [Português](README.pt.md).
+
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)
 ![Discord.py](https://img.shields.io/badge/discord.py-2.5.2-blueviolet?logo=discord)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![Status](https://img.shields.io/badge/status-in%20development-yellow)
 
 ---
 
-## ✨ Funcionalidades
+## ✨ Features
 
-- 🎙️ Comandos Slash;
-- 🧠 Vários modelos de IA disponíveis (DeepSeek, GPT, Claude, etc.);
-- 💬 Modo contínuo de conversa por canal;
-- 📚 Histórico de conversas;
-- 🔧 Suporte a múltiplos canais com modelos diferentes;
-- 💻 Respostas formatadas como código (modo `code`).
+- 🎙️ Slash commands;
+- 🧠 Multiple AI models available (DeepSeek, GPT, Claude, etc.);
+- 💬 Continuous conversation mode by channel;
+- 📚 Conversation history;
+- 🔧 Support for multiple channels with different models;
+- 💻 Responses formatted as code (mode `code`).
 
 ---
 
-## 🚀 Instalação
+## 🚀 Installation
 
-### 1. Clone o repositório
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/seunome/kurama-ai.git
+git clone https://github.com/yourusername/kurama-ai.git
 cd kurama-ai
 ```
 
-### 2. Crie e ative um ambiente virtual
+### 2. Create and activate a virtual environment
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # no Windows: venv\Scripts\activate
+source venv/bin/activate  # on Windows: venv\Scripts\activate
 ```
 
-### 3. Instale as dependências
+### 3. Install the dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure variáveis de ambiente
+### 4. Configure environment variables
 
-Crie um arquivo `.env` na raiz do projeto e adicione:
+Create a `.env` file at the root of the project and add:
 
 ```env
 DISCORD_TOKEN=seu_token_aqui
@@ -53,30 +56,26 @@ OPENROUTER_API_KEY=sua_api_key_openrouter_aqui
 
 ---
 
-## ▶️ Executando o bot
+## ▶️ Running the bot
 
 ```bash
 python main.py
 ```
 
----
+## 📜 Available Commands
 
-## 📜 Comandos disponíveis
+All commands are accessible via `/` on Discord:
 
-Todos os comandos são acessíveis via `/` no Discord:
+- `/ask` – Ask something to the AI
+- `/code` – Ask with a response formatted as code
+- `/models` – List of available models
+- `/model` – Change the AI model for the channel
+- `/reset` – Restore the default model
+- `/ai` – View or toggle continuous conversation mode
+- `/resetmemory` – Clear the channel's conversation history
+- `/help` – Show help with all commands
 
-- `/ask` – Pergunta algo para a IA
-- `/code` – Pergunta com resposta formatada como código
-- `/modelos` – Lista de modelos disponíveis
-- `/model` – Altera o modelo de IA do canal
-- `/reset` – Restaura o modelo padrão
-- `/ia` – Ver ou alternar o modo contínuo de conversa
-- `/resetmemoria` – Apaga o histórico do canal
-- `/ajuda` – Mostra ajuda com todos os comandos
-
----
-
-## 🧠 Modelos Suportados
+## 🧠 Supported Models
 
 - DeepSeek Chat
 - DeepSeek Coder
@@ -85,22 +84,17 @@ Todos os comandos são acessíveis via `/` no Discord:
 - LLaMA 3
 - Mistral
 
-Você pode configurar o modelo por canal, com persistência durante a sessão.
+You can configure the model by channel, with persistence throughout the session.
 
 ---
 
-## 🛠️ Tecnologias
+## 🛠️ Technologies
 
 - Python 3.10+
-- `discord.py` 2.5+
+- discord.py 2.5+
 - OpenRouter API
-- `.env` com `python-dotenv`
-- `requests` para chamadas HTTP
+- `.env` with `python-dotenv`
+- `requests` for HTTP calls
 
----
-
-## 📄 Licença
-
-- Este projeto está licenciado sob os termos da [Licença MIT](LICENSE).
----
-
+## 📄 License
+This project is licensed under the terms of the MIT License.
