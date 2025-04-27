@@ -1,0 +1,19 @@
+# Configurações de build do projeto
+[build]
+builder = "nixpacks"  # Usa o builder Nixpacks para criar a imagem Docker
+buildCommand = "pip install -r requirements.txt"  # Comando para instalar as dependências
+
+# Configurações de deploy
+[deploy]
+startCommand = "python main.py"  # Comando para iniciar o bot
+healthcheckPath = "/"  # Caminho para verificar a saúde do serviço
+healthcheckTimeout = 100  # Tempo máximo (em segundos) para a verificação de saúde
+restartPolicyType = "always"  # Política de reinicialização
+restartPolicyMaxRetries = 10  # Número máximo de tentativas de reinicialização
+restartDelay = 5  # Delay entre tentativas de reinicialização (em segundos)
+
+# Variáveis de ambiente
+[deploy.env]
+PYTHONUNBUFFERED = "1"  # Garante que os logs do Python sejam exibidos em tempo real
+PYTHONPATH = "."  # Adiciona o diretório atual ao PYTHONPATH
+TZ = "America/Sao_Paulo"  # Define o fuso horário para o Brasil 
